@@ -21,8 +21,15 @@
 .opponentIndicator{ position:absolute; top:0; right:15px; font-size: medium}
 
 /*Animations*/
-.example-appear { opacity: 0; height:0; transition: opacity .3s ease-in, height .3s ease-in; }
-.example-appear.example-appear-active { opacity: 1; height:auto; }
+.line-appear { opacity: 0; transition: opacity .3s ease-in; }
+.line-appear.line-appear-active { opacity: 1; }
+.line-enter { opacity: 0; transition: opacity .3s ease-in; }
+.line-enter.line-enter-active { opacity: 1; }
+.line-leave {  opacity: 1; transition: opacity .2s ease-in; }
+.line-leave.line-leave-active { opacity: 0; height:0; }
+
+.line2-appear { opacity: 0; transition: opacity .3s ease-in .3s; }
+.line2-appear.line2-appear-active { opacity: 1; }
 
 .PlayerItem .DeletePlayer{ opacity:0; border-radius:50%; transition: opacity .3s ease-in }
 .PlayerItem:hover .DeletePlayer{ opacity: 1; }
