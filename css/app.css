@@ -1,0 +1,28 @@
+
+#dartboardapp ::selection { background: transparent; /* WebKit/Blink Browsers */}
+#dartboardapp ::-moz-selection { background: transparent; /* Gecko Browsers */}
+#header .form-group{ margin-bottom:0; margin-top:15px;}
+
+
+.PlayerItem .PlayerZone{ color:grey;}
+.PlayerItem .h2{ margin-top:20px; margin-bottom:20px; }
+.PlayerItem.selectedPlayer .PlayerZone { background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGP6DwABBQECz6AuzQAAAABJRU5ErkJggg==) left repeat-x; }
+.PlayerItem.selectedPlayer .Name{ background:#222 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGP6DwABBQECz6AuzQAAAABJRU5ErkJggg==) right repeat-y; color:#0ce3ac; }
+.playerZoneIndicator{ background:#222; }
+.PlayerItem.selectedPlayer .Score{ 
+	background:#222; 
+	color:#0ce3ac; 
+}
+.PlayerItem.selectedPlayer .PlayerZone{ color:white;}
+
+
+.PlayerZone{ font-family: "dart"; cursor:pointer; }
+.BulleHeader{   font-family: 'Glyphicons Halflings'; }
+.opponentIndicator{ position:absolute; top:0; right:15px; font-size: medium}
+
+/*Animations*/
+.example-appear { opacity: 0; height:0; transition: opacity .3s ease-in, height .3s ease-in; }
+.example-appear.example-appear-active { opacity: 1; height:auto; }
+
+.PlayerItem .DeletePlayer{ opacity:0; border-radius:50%; transition: opacity .3s ease-in }
+.PlayerItem:hover .DeletePlayer{ opacity: 1; }
