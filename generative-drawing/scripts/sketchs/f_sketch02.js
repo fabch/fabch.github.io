@@ -1,131 +1,223 @@
-(function(p) {
-  // Constantes
-  var BACKGROUND_COLOR = '#282923'  //hex
-     ,BASE_COLOR       = '#fa2573'  //hex
-     ,NB_POINTS        = 50         //number
-     ,BETA             = 4          //px
-     ,ALPHA            = 8          //px
-     ,TRI_BORDER       = false;     //bool
+(function(pfive){
+
+  var BACKGROUND_COLOR  = [40,41,35]  //hex
+      ,BASE_COLOR       = [200,200,200]  //hex
+      ,ALPHA            = 0        
+      ,THETA            = 0.001       //0.5<-->255
+      ,NB_POINTS        = 50         //number
+      ,COEFF_DUPLI      = 4
+      ,DELAY            = 20
+      ,IS_PAUSED        = false
+      ,IS_FIRST         = true;
 
   //On initialise toutes les variables
-  var vertices, IS_PAUSED, c, nbLoop = 0;
+  var can, pList;
 
-  p.setup = function (){
-    //setUp
-    IS_PAUSED        = false;
-    BACKGROUND_COLOR = p.color(BACKGROUND_COLOR);
-    BASE_COLOR       = p.color(BASE_COLOR);
+  pfive.setup = function (){
+    pfive.colorMode(pfive.RGB,255)
+    pfive.devicePixelScaling(false);
+    BASE_COLOR       = pfive.color(BASE_COLOR);
+    BACKGROUND_COLOR = pfive.color(BACKGROUND_COLOR);
+    ALPHA = 0;
 
-    //on instancie la scène
-    can = p.createCanvas(800, 800);
+    can = pfive.createCanvas(800, 800);
     can.parent('canvasWrapper');
-    p.background(BACKGROUND_COLOR);
-    p.frameRate(1);
-    vertices = generateRandomPoints(NB_POINTS);
-    vertices.push([-1,-1],[p.width+1,-1],[p.width+1,p.height+1],[-1,p.height+1]);
-
+    pfive.background(BACKGROUND_COLOR);
+    pList =[];
+    populateList();
   }
 
-  p.draw = function(){
+  pfive.draw = function (){
+    if(ALPHA < 1) ALPHA += THETA;
+    for(var i = 0; i < pList.length; i += 1){
 
-    p.noFill();
-    p.noStroke();
+      var pA = pList[i];
+      if(pA.delay > 0) {
+        pA.delay--;
+        continue;
+      }
+      var iP = pfive.get(pA.x, pA.y);
+      // verifie que le point est toujours dans le canvas et n'est pas déjà occupé
+      if( !isInBound(pA) || (iP[0] != pfive.red(BACKGROUND_COLOR) || iP[1] != pfive.green(BACKGROUND_COLOR) || iP[2] != pfive.blue(BACKGROUND_COLOR)))
+      {
+        pList.splice(i,1);    //suppresion du point
+        continue;             //passage au point suivant
+      }
 
-    var t = Delaunay.triangulate(vertices); //cf delaunay.js
+      //modification de la couleur du point
+      pfive.colorMode(pfive.RGB, 255,255,255,1);
+      pA.color = pfive.color(pfive.red(pA.color), pfive.green(pA.color), pfive.blue(pA.color), ALPHA);
 
-    for(var i=0; i<t.length; i+=3){
+      pfive.stroke(pA.color);
+      pfive.point(pA.x, pA.y);
 
-      var ax = vertices[t[i]][0]
-         ,ay = vertices[t[i]][1]
-         ,bx = vertices[t[i+1]][0]
-         ,by = vertices[t[i+1]][1]
-         ,cx = vertices[t[i+2]][0]
-         ,cy = vertices[t[i+2]][1];
+      //déplacement du point
+      if (pA.axe === 'x') pA.x += pA.d;
+      else                pA.y += pA.d;
 
-      p.colorMode(p.HSB, 255,255,255);
-      p.stroke(p.color( p.hue(BACKGROUND_COLOR),  60,  60));
-
-      if(TRI_BORDER) triangle(ax,ay,bx,by,cx,cy);
-      computeFill(ax,ay,bx,by,cx,cy);
-
+      matrice(pA);
     }
-    if(nbLoop == 1) p.noLoop();
-    nbLoop++;
   }
 
-  // pour chaque triangle on calcul le côté le plus long
-  function computeFill(x1,y1,x2,y2,x3,y3){
-
-    var vM, m1, m2, p1, p2, x, y 
-       ,v1 = p.createVector(x1,y1)
-       ,v2 = p.createVector(x2,y2)
-       ,v3 = p.createVector(x3,y3)
-       ,d1 = p5.Vector.dist(v1,v2) 
-       ,d2 = p5.Vector.dist(v2,v3)
-       ,d3 = p5.Vector.dist(v3,v1) 
-
-    //on défini le point opposé en vA
-    if (d1 > d2 && d1 >d3) { computeEq(v3,v1,v2); } 
-    else if(d2 > d3)       { computeEq(v1,v2,v3); }
-    else                   { computeEq(v2,v3,v1); }
-
+  /* COMMANDS
+   ----------------------------------------------------------------------------*/
+  pfive.getCommands = function(){
+    return {
+      inputs : {
+        nbpoints : {
+            label    : 'Points'
+            ,type    : 'noUiSlider'
+            ,options : { 
+              start        : 50
+              ,step        : 10
+              ,direction   : 'ltr'
+              ,orientation : 'horizontal'
+              ,behaviour   : 'tap'
+              ,connect     : 'lower'
+              ,range       : { 'min' : 10, '50%' : 50, 'max' : 100 }
+              ,pips        : { mode : 'range', density: 4 }
+            }
+            ,action : setNbPoints
+        }
+        ,coeffdupli : {
+            label    : 'Duplication'
+            ,type    : 'noUiSlider'
+            ,options : { 
+              start        : 4
+              ,step        : 1
+              ,direction   : 'ltr'
+              ,orientation : 'horizontal'
+              ,behaviour   : 'tap'
+              ,connect     : 'lower'
+              ,range       : { 'min' : 0, '50%' : 20, 'max' : 40 }
+              ,pips        : { mode : 'range', density: 4 }
+            }
+            ,action : setCoeffDupli
+        }
+        ,delay : {
+            label    : 'Delay max'
+            ,type    : 'noUiSlider'
+            ,options : { 
+              start        : 20
+              ,step        : 1
+              ,direction   : 'ltr'
+              ,orientation : 'horizontal'
+              ,behaviour   : 'tap'
+              ,connect     : 'lower'
+              ,range       : { 'min' : 0, '50%' : 20, 'max' : 40 }
+              ,pips        : { mode : 'range', density: 4 }
+            }
+            ,action : setDelay
+        }
+        ,color : {
+            label    : 'Couleur'
+            ,type    : 'color'
+            ,default : [200,200,200]
+            ,action : setColor
+        }
+      }
+      ,buttons : {
+        redraw : {
+          content : 'Redessiner'
+          ,attr : { class : 'btn' }
+          ,action : redessine
+        }
+      }
+    };
   }
 
-  function computeEq(vA,vB,vC){
+  var setNbPoints = function (value){
+    NB_POINTS = pfive.round(value); 
+  }
 
-    // on calcul la translation et la rotation du plan pour obtenir l'origine en C et l'axe x sur CB
-    var vAt = p5.Vector.sub(vA,vC);
-    var vBt = p5.Vector.sub(vB,vC);
-    var r   = vBt.heading();
+  var setColor = function (value){
+    BASE_COLOR = value; 
+  }
 
-    vAt.rotate(-r);
-    vBt.rotate(-r);
+  var setCoeffDupli = function (value){
+    COEFF_DUPLI = pfive.round(value); 
+  }
 
-    //on calcul les équations des doites CA et AB
-    m1 = -vAt.y / -vAt.x;
-    m2 = (vBt.y - vAt.y) / (vBt.x - vAt.x);
-    p1 = vAt.y - (vAt.x * m1);
-    p2 = vBt.y - (vBt.x * m2);
+  var setDelay = function (value){
+    DELAY = pfive.round(value); 
+  }
 
-    p.push();
-    p.translate(vC.x, vC.y);
-    p.rotate(r);
+  var redessine = function (){
+    pfive.setup();
+  }
 
-    //on rempli le triangle
-    for(var x = ALPHA; x < vBt.x-ALPHA; x+=BETA){
-      c = BACKGROUND_COLOR;
-      for(var y = ALPHA; y < ((x * m2) + p2)-ALPHA && y < ((x * m1) + p1)-ALPHA; y++){
-        var s = (p.saturation(c)+2 <255) ? p.saturation(c)+2 : 255;
-        var b = (p.brightness(c)+2 <255) ? p.brightness(c)+2 : 255;
-        c = p.color( p.hue(c),  s,  b);
-        p.stroke(c);
-        p.point(x,y);
-      } 
+  //génère une list de points et ses paramètres 
+  function populateList(){
+    for (var i=0; i < NB_POINTS; i++){
+
+        var a = {};
+        a.axe   = (pfive.random(-1,1) > 0) ? 'x' : 'y';   //axe déplacement
+        a.d     = (pfive.random(-1,1) > 0) ? 1   :  -1;   //direction déplacement
+        a.color = BASE_COLOR;                  //couleur
+        a.delay = pfive.round(pfive.random(0,DELAY));              //delay depart
+        
+
+        //on place le point aléatoirement en function de son déplacement 
+        //(ie : si il se déplace vers la gauche on le place sur le bord droite du canvas)
+        if      (a.axe == 'x' && a.d == 1)       //droite
+        {
+          a.x = 1;
+          a.y = pfive.random(0, pfive.height);
+        } 
+        else if (a.axe == 'y' && a.d == -1) //haut
+        { 
+          a.x = pfive.random(0, pfive.width);
+          a.y  = pfive.height-1;
+        } 
+        else if (a.axe == 'x' && a.d == -1) //gauche
+        { 
+          a.x = pfive.width-1;
+          a.y = pfive.random(0, pfive.height);
+        } 
+        else                            //bas
+        { 
+          a.x = pfive.random(0, pfive.width);
+          a.y = 1;
+        }
+        pList.push(a);
     }
-    p.pop();
   }
 
-  //on génère un tableau de points aléatoirement
-  function generateRandomPoints(nb){
-    var tab=[];
-    for(var i=0; i<nb; i++){
-      tab.push([ p.round(p.random(0, p.width)) , p.round(p.random(0, p.height)) ]);
+  // génère un nouveau point à partir du point donné
+  function matrice(pR){
+
+    if(pfive.random(0,100) > 100 - COEFF_DUPLI){
+      var n = {};
+      n.axe   = (pR.axe =='x')      ? 'y' : 'x';       //axe deplacement
+      n.d     = (pfive.random(-1, 1) > 0) ? 1 : -1;    //direction déplacement
+      n.color = pR.color;                              //couleur
+      n.delay = pfive.round(pfive.random(0,DELAY));       //delay départ
+      n.x     = pR.x;    
+      n.y     = pR.y;    
+      pList.push(n);
     }
-    return tab;
+
+  }
+
+  // on verifie que le point est toujours dans le canvas
+  function isInBound(tP){
+    return (tP.x > 0 && tP.x < pfive.width && tP.y > 0 && tP.y < pfive.height) ? true : false;
   }
 
   //function de mise en pause de la boucle draw()
-  function keyPressed(){
-    if(key === 'p' || key === 'P'){
-      if(IS_PAUSED === true) {
-        console.log('unpause'); 
-        IS_PAUSED = false;
-        p.loop();
-      }else {
-        console.log('pause');
-        IS_PAUSED = true;
-        p.noLoop();
-      }
+  pfive.keyPressed = function (){
+
+    if(pfive.key != 'p' && pfive.key != 'P') return false;
+
+    if (IS_PAUSED === true) {
+      console.log('unpause'); 
+      IS_PAUSED = false;
+      pfive.loop();
+    } else {
+      console.log('pause');
+      IS_PAUSED = true;
+      pfive.noLoop();
     }
   }
-})
+
+});

@@ -18,6 +18,9 @@
     hs               = [];
     img = pfive.loadImage("assets/vermeer-girl-with-a-pearl-earring.jpg");
     can = pfive.createCanvas(800, 800);
+
+    can.mouseClicked(addHs);
+    //addActions();
   }
 
   pfive.setup = function(){

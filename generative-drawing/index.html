@@ -6,7 +6,7 @@
 
 	<script language="javascript" type="text/javascript" src="scripts/vendors.min.js"></script>
 	<script language="javascript" type="text/javascript" src="scripts/app.min.js"></script>
-	<link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,200,700' rel='stylesheet' type='text/css'>
+	<link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,200,700" rel="stylesheet" type="text/css">
 	<link rel="stylesheet" type="text/css" href="styles/app.min.css">
 </head>
 
@@ -14,32 +14,31 @@
 	<header class="fixed left">
 		<div class="wrapper">
 			<header>
-				<h2>Menu</h2>
+				<h2><i class="fa fa-code"></i></h2>
 			</header>
 			<ul id="sketches">
-				<li><a href="scripts/sketchs/f_sketch01.js">#sketch01</a></li>
-				<li><a href="scripts/sketchs/f_sketch02.js">#sketch02</a></li>
-				<li><a href="scripts/sketchs/f_sketch03.js">#sketch03</a></li>
-				<li><span>#sketch03</span></li>
-				<li><span>#sketch03</span></li>
-				<li><span>#sketch04</span></li>
+				<li><a href="scripts/sketchs/f_sketch01.js">#01 | Delaunay</a></li>
+				<li><a href="scripts/sketchs/f_sketch02.js">#02 | Jared</a></li>
+				<li><a href="scripts/sketchs/f_sketch03.js">#03 | Perlin</a></li>
+				<li><a href="scripts/sketchs/f_sketch04.js">#04 | Modulo</a></li>
 				<li><span>#sketch05</span></li>
+				<li><span>#sketch06</span></li>
 				<li><span>#sketch07</span></li>
+				<li><span>#sketch08</span></li>
 				<li><span>#sketch09</span></li>
 				<li><span>#sketch10</span></li>
-				<li><span>#sketch12</span></li>
-				<li><span>#sketch16</span></li>
-				<li><a href="scripts/sketchs/sketch17.js">#sketch17</a></li>
 			</ul>
 		</div>
 	</header>
-	<section>
-		<div id="canvasWrapper" class="full"></div>
+	<section id="main">
+		<img id="preloader" src="assets/preloader.gif" alt="preloader" />
+		<div id="canvasWrapper" class="full">
+		</div>
 	</section>
 	<aside id="commandBlockWrapper" class="fixed right">
 		<div class="wrapper">
 			<header>
-				<h2>Commandes</h2>
+				<h2><i class="fa fa-sliders"></i></h2>
 				<!--i class="fa fa2x fa-code"></i-->
 			</header>
 			<div id="commandBlock">

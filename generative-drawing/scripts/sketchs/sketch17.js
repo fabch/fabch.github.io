@@ -52,7 +52,7 @@
        v2.rotate(r1);
        v3.rotate(r2);
        var v4 = p5.Vector.lerp(v2,v3);
-       c = p.color(p.degrees(v4.heading()),60,50);
+       //c = p.color(p.degrees(v4.heading()),60,50);
        //c = color(0,0,0);
        p.stroke(c);
        p.line(v2.x,v2.y,v3.x,v3.y);
